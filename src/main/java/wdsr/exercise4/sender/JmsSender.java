@@ -49,7 +49,6 @@ public class JmsSender {
 	        connection.start();
 	        Session session = connection.createSession(transacted, ackMode);
 	        Destination adminQueue = session.createQueue(queueName);
-	        
 	       
 	        this.producer = session.createProducer(adminQueue);
             this.producer.setDeliveryMode(DeliveryMode.NON_PERSISTENT);
@@ -85,12 +84,9 @@ public class JmsSender {
 	        Session session = connection.createSession(transacted, ackMode);
 	        Destination adminQueue = session.createQueue(queueName);
 	        
-	       
 	        this.producer = session.createProducer(adminQueue);
             this.producer.setDeliveryMode(DeliveryMode.NON_PERSISTENT);
-            
-           
-            
+                    
             TextMessage message = session.createTextMessage();
             message.setText(text);
             
@@ -118,12 +114,9 @@ public class JmsSender {
 	        connection.start();
 	        Session session = connection.createSession(transacted, ackMode);
 	        Destination adminQueue = session.createTopic(topicName);
-	        
-	       
+	        	       
 	        this.producer = session.createProducer(adminQueue);
             this.producer.setDeliveryMode(DeliveryMode.NON_PERSISTENT);
-            
-           
             
             MapMessage message = session.createMapMessage();
             
