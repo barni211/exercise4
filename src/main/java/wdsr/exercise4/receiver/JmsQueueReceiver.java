@@ -92,7 +92,7 @@ public class JmsQueueReceiver {
 			{
 					TextMessage textMessage = (TextMessage) message;
 					String text = textMessage.getText();
-		            listOfMessages.add(textMessage.getText());
+		            listOfMessages.add(text);
 		            log.info(text);
 		            message = consumer.receive(100);
 			}
@@ -126,10 +126,6 @@ public class JmsQueueReceiver {
 		
 	}
 
-	public String getSize() {
-		// TODO Auto-generated method stub
-		return null;
-	}
 
 
 	// TODO
