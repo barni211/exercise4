@@ -12,7 +12,7 @@ public class Main {
 	public static void main(String[] args) {
 		log.info("\nEnter application.");
 		
-		JmsSender sender = new JmsSender("barni211.QUEUE", "");
+		JmsSender sender = new JmsSender("barni211.TOPIC");
 		sender.sendTextToQueue();
 		
 		log.info("\nEnd application");

@@ -22,15 +22,14 @@ import wdsr.exercise4.Order;
 public class JmsSender {
 	private static final Logger log = LoggerFactory.getLogger(JmsSender.class);
 	
-	private final String queueName;
+	//private final String queueName;
 	private final String topicName;
 	private final ActiveMQConnectionFactory connectionFactory;
 	private static int ackMode;
 	private static boolean transacted;
 	private MessageProducer producer;
 
-	public JmsSender(final String queueName, final String topicName) {
-		this.queueName = queueName;
+	public JmsSender(String topicName) {
 		this.topicName = topicName;
 		ackMode = Session.AUTO_ACKNOWLEDGE;
 		connectionFactory = new ActiveMQConnectionFactory("tcp://localhost:61616");
@@ -42,35 +41,7 @@ public class JmsSender {
 	 * @param product Name of the product
 	 * @param price Price of the product
 	 */
-	public void sendOrderToQueue(final int orderId, final String product, final BigDecimal price) {
-		Connection connection;
-		try {
-			connection = connectionFactory.createConnection();
-	        connection.start();
-	        Session session = connection.createSession(transacted, ackMode);
-	        Destination adminQueue = session.createQueue(queueName);
-	       
-	        this.producer = session.createProducer(adminQueue);
-            this.producer.setDeliveryMode(DeliveryMode.NON_PERSISTENT);
-            
-            Order order = new Order(orderId, product, price);
-            
-            ObjectMessage message = session.createObjectMessage(order);
-            
-            message.setJMSType("Order");
-			message.setStringProperty("WDSR-System", "OrderProcessor");
-			producer.send(message);
-			
-			session.close();
-			connection.close();
-            
-		} catch (JMSException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-
-        
-	}
+	
 
 	/**
 	 * This method sends the given String to the queue as a TextMessage.
@@ -82,12 +53,12 @@ public class JmsSender {
 			connection = connectionFactory.createConnection();
 	        connection.start();
 	        Session session = connection.createSession(transacted, ackMode);
-	        Destination adminQueue = session.createQueue(queueName);
+	        Destination adminTopic = session.createTopic(topicName);
 	        
 	        long start;
             long stop;
 	        
-	        this.producer = session.createProducer(adminQueue);
+	        this.producer = session.createProducer(adminTopic);
             this.producer.setDeliveryMode(DeliveryMode.PERSISTENT);
             
             
