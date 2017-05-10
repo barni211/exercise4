@@ -103,7 +103,7 @@ public class JmsSender {
 	        
 	        stop = System.currentTimeMillis();
 	        
-	        log.info("10000 persistent messages sent in " + String.valueOf(stop - start) + " seconds");
+	        log.info("10000 persistent messages sent in " + String.valueOf(stop - start) + " miliseconds");
 	        
 	        this.producer.setDeliveryMode(DeliveryMode.NON_PERSISTENT);
 	        
@@ -120,7 +120,7 @@ public class JmsSender {
 	        stop = System.currentTimeMillis();
 	        
             
-	        log.info("10000 non_persistent messages sent in " + String.valueOf(stop - start) + " seconds");
+	        log.info("10000 non_persistent messages sent in " + String.valueOf(stop - start) + " miliseconds");
             
            
 			
