@@ -17,7 +17,7 @@
         </amq:transportConnectors>
     </amq:broker>
 
-    <amq:connectionFactory id="jmsConnectionFactory" brokerURL="tcp://localhost:62616" trustAllPackages="true">
+    <amq:connectionFactory id="jmsConnectionFactory" brokerURL="tcp://localhost:61616" trustAllPackages="true">
         <amq:properties>
             <amq:redeliveryPolicy maximumRedeliveries="1"/>
         </amq:properties>

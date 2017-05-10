@@ -23,7 +23,7 @@
 		</Console>
 	</Appenders>
 	<Loggers>
-		<Root level="info" additivity="false">
+		<Root level="info" additivity="true">
 			<appender-ref ref="console" level="debug"/>
             <appender-ref ref="file-log" level="debug" />
 		</Root>

@@ -1,6 +1,8 @@
 package wdsr.exercise4.receiver;
 
+import java.awt.List;
 import java.math.BigDecimal;
+import java.util.ArrayList;
 
 import javax.jms.Connection;
 import javax.jms.Destination;
@@ -37,93 +39,79 @@ public class JmsQueueReceiver {
 	private MessageConsumer consumer;
 	private AlertService registerCallBack;
 	private MessageListener listener;
+	private ArrayList<String> listOfMessages;
 
 	/**
 	 * Creates this object
 	 * @param queueName Name of the queue to consume messages from.
 	 */
 	public JmsQueueReceiver(final String queueName) {
+		log.debug("Receiver is on create now.");
 		this.queueName = queueName;
-		connectionFactory = new ActiveMQConnectionFactory("tcp://localhost:62616");
+		connectionFactory = new ActiveMQConnectionFactory("tcp://localhost:61616");
 		connectionFactory.setTrustAllPackages(true);
+		createSessionAndConsumer();
+	
+		listOfMessages = new ArrayList<String>();
 	}
 
 	/**
 	 * Registers the provided callback. The callback will be invoked when a price or volume alert is consumed from the queue.
 	 * @param alertService Callback to be registered.
 	 */
-	public void registerCallback(AlertService alertService) {
+	public void createSessionAndConsumer() {
 		try {
 			connection = connectionFactory.createConnection();
 			connection.start();
 			session = connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
 			Destination admQueue = session.createQueue(queueName);
-			consumer = session.createConsumer(admQueue);
-			registerCallBack = alertService;
+			consumer = session.createConsumer(admQueue);		
 			
-			listener = new MessageListener()
-			{
-
-				@Override
-				public void onMessage(Message message) {
-					// TODO Auto-generated method stub
-					String messageTypeString;
-					try {
-						messageTypeString = message.getJMSType().toString();
-						
-						if(message instanceof ObjectMessage)
-						{
-							registerCallBackObject(messageTypeString, message);
-						}
-						else if(message instanceof TextMessage)
-						{
-							registerCallBackText(messageTypeString, message);
-						}
-						
-							
-					} catch (JMSException e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
-					}
-										
-				}
-				
-			};
-			consumer.setMessageListener(listener);
+			log.debug("Session is nov available");
 		} catch (JMSException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+
+	}
 	
+	public void closeSession()
+	{
+		try {
+			connection.close();
+			session.close();
+		} catch (JMSException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 		
 	}
 	
-	private PriceAlert processPriceAlertTextMessage(TextMessage priceAlert) throws JMSException, NumberFormatException {
-
-		String priceAlertText = priceAlert.getText();
-		String[] priceAlertSplit = priceAlertText.split("=|\\r?\\n");
-		PriceAlert priceAlertObject = null;
-		if (priceAlertSplit.length == 6) {
-			priceAlertObject = new PriceAlert(Long.parseLong(priceAlertSplit[1].trim()), priceAlertSplit[3].trim(),
-					BigDecimal.valueOf(Long.parseLong(priceAlertSplit[5].trim())));
+	public void getMessages() throws JMSException
+	{
+		
+		Message message = null;
+		try {
+			message = consumer.receive(Message.DEFAULT_DELIVERY_DELAY);
+			while(message!=null && message instanceof TextMessage)
+			{
+					log.debug("i'm doin' something");
+					TextMessage textMessage = (TextMessage) message;
+		            listOfMessages.add(textMessage.getText());			
+			}
+			message = consumer.receive(100);
+		}catch (Exception ex)
+		{
+			log.error(ex.getMessage());
 		}
-		return priceAlertObject;
-
+		closeSession();
+	
+		
+			
+		//return listOfMessages;
+			
 	}
 
-	
-	private VolumeAlert processVolumeAlertTextMessage(TextMessage volumeAlert) throws JMSException, NumberFormatException {
-
-		String volumeAlertText = volumeAlert.getText();
-		String[] volumeAlertSplit = volumeAlertText.split("=|\\r?\\n");
-		VolumeAlert volumeAlertObject = null;
-		if (volumeAlertSplit.length == 6) {
-			volumeAlertObject = new VolumeAlert(Long.parseLong(volumeAlertSplit[1].trim()), volumeAlertSplit[3].trim(),
-					Long.parseLong(volumeAlertSplit[5].trim()));
-		}
-		return volumeAlertObject;
-
-}
 	
 	/**
 	 * Deregisters all consumers and closes the connection to JMS broker.
@@ -140,36 +128,12 @@ public class JmsQueueReceiver {
 		}
 		
 	}
-	
-	public void registerCallBackObject(String messageTypeString, Message message) throws JMSException
-	{
-		ObjectMessage objectMessage = (ObjectMessage) message;
-		if(messageTypeString.equals(String.valueOf("PriceAlert")))
-		{
-			PriceAlert alertToInvoke = (PriceAlert) objectMessage.getObject();
-			registerCallBack.processPriceAlert(alertToInvoke);
-		}
-		else if(messageTypeString.equals(String.valueOf("VolumeAlert")))
-		{
-			VolumeAlert alertToInvoke = (VolumeAlert) objectMessage.getObject();
-			registerCallBack.processVolumeAlert(alertToInvoke);
-		}
+
+	public String getSize() {
+		// TODO Auto-generated method stub
+		return String.valueOf(listOfMessages.size());
 	}
-	
-	public void registerCallBackText(String messageTypeString, Message message) throws JMSException
-	{
-		TextMessage textMessage = (TextMessage) message;
-		if(messageTypeString.equals(String.valueOf("PriceAlert")))
-		{
-			PriceAlert alert =  processPriceAlertTextMessage(textMessage);
-			registerCallBack.processPriceAlert(alert);
-		}
-		else if(messageTypeString.equals(String.valueOf("VolumeAlert")))
-		{
-			VolumeAlert alert = processVolumeAlertTextMessage(textMessage);
-			registerCallBack.processVolumeAlert(alert);
-		}
-	}
+
 
 	// TODO
 	// This object should start consuming messages when registerCallback method is invoked.
