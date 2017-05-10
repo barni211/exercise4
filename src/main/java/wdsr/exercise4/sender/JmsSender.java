@@ -84,10 +84,12 @@ public class JmsSender {
 	        Session session = connection.createSession(transacted, ackMode);
 	        Destination adminQueue = session.createQueue(queueName);
 	        
+	        long start;
+            long stop;
+	        
 	        this.producer = session.createProducer(adminQueue);
             this.producer.setDeliveryMode(DeliveryMode.PERSISTENT);
-            long start;
-            long stop;
+            
             
             start=System.currentTimeMillis();
             
@@ -101,7 +103,7 @@ public class JmsSender {
 	        
 	        stop = System.currentTimeMillis();
 	        
-	        log.debug("10000 persistent messages sent in " + String.valueOf(stop - start) + " seconds");
+	        log.info("10000 persistent messages sent in " + String.valueOf(stop - start) + " seconds");
 	        
 	        this.producer.setDeliveryMode(DeliveryMode.NON_PERSISTENT);
 	        
@@ -118,7 +120,7 @@ public class JmsSender {
 	        stop = System.currentTimeMillis();
 	        
             
-	        log.debug("10000 non_persistent messages sent in " + String.valueOf(stop - start) + " seconds");
+	        log.info("10000 non_persistent messages sent in " + String.valueOf(stop - start) + " seconds");
             
            
 			
