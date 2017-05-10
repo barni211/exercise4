@@ -39,20 +39,16 @@ public class JmsQueueReceiver {
 	private MessageConsumer consumer;
 	private AlertService registerCallBack;
 	private MessageListener listener;
-	private ArrayList<String> listOfMessages;
 
 	/**
 	 * Creates this object
 	 * @param queueName Name of the queue to consume messages from.
 	 */
 	public JmsQueueReceiver(final String queueName) {
-		log.debug("Receiver is on create now.");
 		this.queueName = queueName;
 		connectionFactory = new ActiveMQConnectionFactory("tcp://localhost:61616");
 		connectionFactory.setTrustAllPackages(true);
 		createSessionAndConsumer();
-	
-		listOfMessages = new ArrayList<String>();
 	}
 
 	/**
@@ -67,7 +63,6 @@ public class JmsQueueReceiver {
 			Destination admQueue = session.createQueue(queueName);
 			consumer = session.createConsumer(admQueue);		
 			
-			log.debug("Session is nov available");
 		} catch (JMSException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -87,19 +82,21 @@ public class JmsQueueReceiver {
 		
 	}
 	
-	public void getMessages() throws JMSException
+	public ArrayList<String> getMessages() throws JMSException
 	{
-		
+		ArrayList<String> listOfMessages = new ArrayList<String>(100);
 		Message message = null;
 		try {
 			message = consumer.receive(Message.DEFAULT_DELIVERY_DELAY);
 			while(message!=null && message instanceof TextMessage)
 			{
-					log.debug("i'm doin' something");
 					TextMessage textMessage = (TextMessage) message;
-		            listOfMessages.add(textMessage.getText());			
+					String text = textMessage.getText();
+		            listOfMessages.add(textMessage.getText());
+		            log.info(text);
+		            message = consumer.receive(100);
 			}
-			message = consumer.receive(100);
+			
 		}catch (Exception ex)
 		{
 			log.error(ex.getMessage());
@@ -108,7 +105,7 @@ public class JmsQueueReceiver {
 	
 		
 			
-		//return listOfMessages;
+		return listOfMessages;
 			
 	}
 
@@ -131,7 +128,7 @@ public class JmsQueueReceiver {
 
 	public String getSize() {
 		// TODO Auto-generated method stub
-		return String.valueOf(listOfMessages.size());
+		return null;
 	}
 
 

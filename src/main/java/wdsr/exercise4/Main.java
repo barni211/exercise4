@@ -16,10 +16,10 @@ public class Main {
 		// TODO Auto-generated method stub
 		log.info("Enter application.");
 		
-		JmsQueueReceiver receiver = new JmsQueueReceiver("BARNI211.QUEUE");
-		receiver.getMessages();
+		JmsQueueReceiver receiver = new JmsQueueReceiver("barni211.QUEUE");
+		ArrayList<String> messages = receiver.getMessages();
 		
-		log.info("Received " + receiver.getSize() + " messages.");
+		log.info("Received " + messages.size() + " messages.");
 		log.info("Exit application.");
 
 	}
