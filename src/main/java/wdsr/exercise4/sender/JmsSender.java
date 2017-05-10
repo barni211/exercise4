@@ -33,7 +33,7 @@ public class JmsSender {
 		this.queueName = queueName;
 		this.topicName = topicName;
 		ackMode = Session.AUTO_ACKNOWLEDGE;
-		connectionFactory = new ActiveMQConnectionFactory("tcp://localhost:62616");
+		connectionFactory = new ActiveMQConnectionFactory("tcp://localhost:61616");
 	}
 
 	/**
@@ -76,7 +76,7 @@ public class JmsSender {
 	 * This method sends the given String to the queue as a TextMessage.
 	 * @param text String to be sent
 	 */
-	public void sendTextToQueue(String text) {
+	public void sendTextToQueue() {
 		Connection connection;
 		try {
 			connection = connectionFactory.createConnection();
@@ -85,14 +85,42 @@ public class JmsSender {
 	        Destination adminQueue = session.createQueue(queueName);
 	        
 	        this.producer = session.createProducer(adminQueue);
-            this.producer.setDeliveryMode(DeliveryMode.NON_PERSISTENT);
-                    
-            TextMessage message = session.createTextMessage();
-            message.setText(text);
+            this.producer.setDeliveryMode(DeliveryMode.PERSISTENT);
+            long start;
+            long stop;
             
-            message.setJMSType("Order");
-			message.setStringProperty("WDSR-System", "OrderProcessor");
-			producer.send(message);
+            start=System.currentTimeMillis();
+            
+	        for(int i = 0 ; i<10000; i++)
+	        {
+	        	String text = "test_" + i;
+	        	TextMessage message = session.createTextMessage();
+	            message.setText(text);
+	            producer.send(message);
+	        }
+	        
+	        stop = System.currentTimeMillis();
+	        
+	        log.debug("10000 persistent messages sent in " + String.valueOf(stop - start) + " seconds");
+	        
+	        this.producer.setDeliveryMode(DeliveryMode.NON_PERSISTENT);
+	        
+	        start = System.currentTimeMillis();
+	        
+	        for(int i = 0 ; i<10000; i++)
+	        {
+	        	String text = "test_" + i;
+	        	TextMessage message = session.createTextMessage();
+	            message.setText(text);
+	            producer.send(message);
+	        }
+	        
+	        stop = System.currentTimeMillis();
+	        
+            
+	        log.debug("10000 non_persistent messages sent in " + String.valueOf(stop - start) + " seconds");
+            
+           
 			
 			session.close();
 			connection.close();
